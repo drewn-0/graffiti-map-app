@@ -5,16 +5,6 @@ import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import graffitiData from '../data/graffitiData';
 
-delete L.Icon.Default.prototype._getIconUrl;
-L.Icon.Default.mergeOptions({
-  iconUrl: '/icons/marker-icon-2x-blue.png',
-  shadowUrl: '/icons/marker-shadow.png',
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
-  popupAnchor: [1, -34],
-  shadowSize: [41, 41],
-});
-
 const redIcon = new L.Icon({
   iconUrl: '/icons/marker-icon-2x-red.png',
   shadowUrl: '/icons/marker-shadow.png',
@@ -25,7 +15,7 @@ const redIcon = new L.Icon({
 });
 
 const graffitiIcon = new L.Icon({
-  iconUrl: '/icons/marker-icon-2x-blue.png',
+  iconUrl: '/icons/marker-icon-2x.png',
   shadowUrl: '/icons/marker-shadow.png',
   iconSize: [25, 41],
   iconAnchor: [12, 41],
@@ -169,7 +159,7 @@ export default function Map({ routeType, userLocation }) {
         </Marker>
 
         {graffitiData.map((graffiti) => (
-          <Marker key={graffiti.id} position={graffiti.coordinates}>
+          <Marker key={graffiti.id} position={graffiti.coordinates} icon={graffitiIcon}>
             <Popup>
               <div>
                 <h3 className="graffiti-title">{graffiti.name}</h3>
