@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import graffitiData from '../data/graffitiData';
 import { Link, useNavigate } from 'react-router-dom';
-import routeIcon from '../public/icons/route.svg';
+
 
 const normalizeText = (text) => {
   return text.toLowerCase().replace(/ё/g, 'е');
@@ -73,7 +73,7 @@ const InfoPanel = () => {
                     </Link>
                     <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
                       <button className="popup-button" onClick={() => handleBuildRoute(g)}>
-                        <img src={routeIcon} />
+                        <img src={'/icons/route.svg'} />
                         Построить маршрут
                       </button>
                       <button className="popup-button" onClick={() => handleShowOnMap(g)}>
