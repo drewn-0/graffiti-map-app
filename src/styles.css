@@ -513,10 +513,12 @@ body.dark-theme .search-result {
     font-size: 14px;
   }
 
-  .graffiti-title, .list-title, .report-title, .screen-title {
+  .graffiti-title, .list-title, .report-title {
     font-size: 16px;
   }
-
+  .screen-title {
+    font-size: 20px;
+  }
   .graffiti-description, .graffiti-stats, .comment, .form-label {
     font-size: 14px;
   }
