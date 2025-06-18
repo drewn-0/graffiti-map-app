@@ -1,7 +1,6 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import graffitiData from '../data/graffitiData';
 import FitPhoto from '/src/components/FitPhoto';
-import routeIcon from '../public/icons/route.svg';
 
 const GraffitiPage = () => {
   const { id } = useParams();
@@ -59,7 +58,7 @@ const GraffitiPage = () => {
         className="popup-button"
         onClick={() => handleBuildRoute(document.querySelector('input[name="routeType"]:checked').value)}
       >
-        <img src={routeIcon}/>
+        <img src={'/icons/route.svg'}/>
         Построить маршрут
       </button>
     </div>
