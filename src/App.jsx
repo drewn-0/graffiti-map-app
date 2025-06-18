@@ -40,17 +40,6 @@ const App = () => {
       setUserLocation([56.838129, 60.597228]);
     }
   };
-  /*useEffect(() => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          setUserLocation([position.coords.latitude, position.coords.longitude]);
-        },
-      );
-    } else {
-      setUserLocation([56.838129, 60.597228]); //Центр города
-    }
-  }, []);*/
 
   return (
     <div className="app-container">
@@ -71,7 +60,6 @@ const App = () => {
           </div>
         )}
 
-        { /* После запроса, если юзерLocation ещё null — показываем «Загрузка…» */ }
         {locationRequested && userLocation === null && (
           <div style={{ textAlign: 'center', padding: '20px' }}>
             Загрузка карты и локации...
