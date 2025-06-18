@@ -57,7 +57,7 @@ export default [
     name: 'Mostr',
     coordinates: [56.827353, 60.605640],
     description: 'Граффити под мостом над рекой Исеть. Мост по ул. Куйбышева, рядом с пересечением ул. 8 Марта',
-    author: 'Никита Номерз, @nilita_nomerz',
+    author: 'Никита Номерз, @nikita_nomerz',
     photos: ["https://avatars.mds.yandex.net/get-altay/4042551/2a0000017fdf4d6a1be65c6303caa05edb9a/XXXL"],
     likes: 0,
     comments: [{}],
