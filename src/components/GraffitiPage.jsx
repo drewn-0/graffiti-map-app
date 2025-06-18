@@ -19,7 +19,7 @@ const GraffitiPage = () => {
     <div className="app-screen">
       <h1 className="screen-title">{graffiti.name}</h1>
       <p className="graffiti-description">{graffiti.description}</p>
-      <h1 className="graffiti-title">Фото</h1>
+      <h1 className="screen-title" style={{textAlign:"start"}}>Фото:</h1>
       <div className="photo-container">
         {graffiti.photos && graffiti.photos.length > 0 ? (
           <a href={graffiti.photos[0]}>
@@ -34,7 +34,9 @@ const GraffitiPage = () => {
           <p className="no-photo">Нет фото</p>
         )}
       </div>
-      <h1 className="graffiti-title">Как добраться?</h1>
+      <h1 className="screen-title" style={{textAlign:"start"}}>Авторы:</h1>
+      <h1 className="graffiti-title" >{graffiti.author}</h1>
+      <h1 className="screen-title" style={{textAlign:"start"}}>Как добраться?</h1>
       <div className="route-type-selector fancy-radio-group">
         <label className="fancy-radio">
           <input
