@@ -24,7 +24,8 @@ const InfoPanel = () => {
       .filter(
         (graffiti) =>
           normalizeText(graffiti.name).includes(normalizedQuery) ||
-          normalizeText(graffiti.description).includes(normalizedQuery)
+          normalizeText(graffiti.description).includes(normalizedQuery) ||
+          normalizeText(graffiti.author).includes(normalizedQuery)
       )
       .slice(0, 10);
     setSearchResults(results);
