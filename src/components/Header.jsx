@@ -1,4 +1,6 @@
 import { Link } from 'react-router-dom';
+import optionsIcon from '../public/icons/options.svg';
+import profileIcon from '../public/icons/profile.svg';
 
 const Header = () => {
   return (
@@ -9,10 +11,10 @@ const Header = () => {
       </div>
       <div className="header-right">
         <Link to="/settings" className="header-button">
-          <img src='/icons/options.svg' alt="Settings" className="icon" />
+          <img src={optionsIcon} alt="Settings" className="icon" />
         </Link>
         <Link to="/profile" className="header-button profile">
-          <img src='/icons/profile.svg' alt="Profile" className="icon" />
+          <img src={profileIcon} alt="Profile" className="icon" />
         </Link>
       </div>
     </header>
