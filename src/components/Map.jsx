@@ -4,20 +4,17 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import graffitiData from '../data/graffitiData';
-import markerIcon from '/icons/marker-icon.png';
-import markerIconPng from '/icons/marker-icon-2x-red.png';
-import markerShadowPng from '/icons/marker-shadow.png';
 
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
-  iconUrl: markerIcon,
-  shadowUrl: markerShadowPng,
+  iconUrl: '/icons/marker-icon.png',
+  shadowUrl: '/icons/marker-shadow.png',
 });
 
 //Красный маркер для местоположения
 const redIcon = new L.Icon({
-  iconUrl: markerIconPng,
-  shadowUrl: markerShadowPng,
+  iconUrl: '/icons/marker-icon-2x-red.png',
+  shadowUrl: '/icons/marker-shadow.png',
   iconSize: [25, 41],
   iconAnchor: [12, 41],
   popupAnchor: [1, -34],
