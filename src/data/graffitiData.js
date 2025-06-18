@@ -17,7 +17,7 @@ export default [
     name: 'Манифест о свободе и несвободе',
     coordinates: [56.839223778135334, 60.598792114044954],
     description: 'Граффити на торце дома. Ул. 8 Марта, д. 7',
-    author: '',
+    author: 'Георгий Куринов, @gooze_art',
     photos: ["https://avatars.mds.yandex.net/get-altay/9717139/2a000001892c6e0906ac3cc8688425d444d9/XXXL"],
     likes: 2,
     comments: [{ id: 'c3', user: 'user3', text: 'Мило!', timestamp: '2025-06-03' }],
