@@ -1,10 +1,9 @@
-import defaultAvatar from '/pictures/default_avatar.png';
 const ProfileScreen = () => (
   <div className="app-screen">
     <h2 className="screen-title">Профиль пользователя</h2>
     <div className="convenience">
       <img
-        src={defaultAvatar}
+        src='/pictures/default_avatar.png'
         alt="Profile"
         style={{
           width: 100,
