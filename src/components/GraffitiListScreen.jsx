@@ -20,7 +20,8 @@ const GraffitiListScreen = () => {
         .filter(
           (g) =>
             normalizeText(g.name).includes(normalizedQuery) ||
-            normalizeText(g.description).includes(normalizedQuery)
+            normalizeText(g.description).includes(normalizedQuery) ||
+            normalizeText(g.author).includes(normalizedQuery)
         )
         .slice(0, 10);
       setFilteredGraffiti(results);
