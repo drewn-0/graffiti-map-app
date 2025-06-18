@@ -5,7 +5,7 @@ export default [
     coordinates: [56.838418324759374, 60.60435660503121],
     description: 'Граффити в подземном переходе через проспект Ленина.',
     author: '',
-    photos: ["https://cachizer1.2gis.com/reviews-photos/34cc4d2d-b096-4459-a7d5-3369682c8bd1.jpg?w=1920"],
+    photos: ["https://avatars.mds.yandex.net/get-altay/13944697/2a00000196f99ecb660bfa2facf538a3a130/XXXL"],
     likes: 1,
     comments: [
       { id: 'c1', user: 'user1', text: 'Классное граффити!', timestamp: '2025-06-01' },
