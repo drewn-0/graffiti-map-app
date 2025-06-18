@@ -98,7 +98,7 @@ const AddGraffitiScreen = () => {
               type="text"
               value={formData.coordinatesInput}
               onChange={handleCoordinatesChange}
-              placeholder='На карте можно выбрать место долгим нажатием'
+              placeholder='На карте можно выбрать место двойным нажатием'
               className="form-input"
               style={{ flex: 1 }}
             />
