@@ -7,11 +7,14 @@ import graffitiData from '../data/graffitiData';
 
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
-  iconUrl: '/icons/marker-icon.png',
+  iconUrl: '/icons/marker-icon-2x-blue.png',
   shadowUrl: '/icons/marker-shadow.png',
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  shadowSize: [41, 41],
 });
 
-//Красный маркер для местоположения
 const redIcon = new L.Icon({
   iconUrl: '/icons/marker-icon-2x-red.png',
   shadowUrl: '/icons/marker-shadow.png',
@@ -21,46 +24,32 @@ const redIcon = new L.Icon({
   shadowSize: [41, 41],
 });
 
-function LongPressPopup({ onLongPress }) {
-  const timerRef = useRef(null);
-  const [pressing, setPressing] = useState(false);
+const graffitiIcon = new L.Icon({
+  iconUrl: '/icons/marker-icon-2x-blue.png',
+  shadowUrl: '/icons/marker-shadow.png',
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  shadowSize: [41, 41],
+});
+
+function DoubleClickPopup({ onDoubleClick }) {
+  const lastTouchRef = useRef(null);
 
   useMapEvents({
-    mousedown(e) {
-      setPressing(true);
-      timerRef.current = setTimeout(() => {
-        onLongPress(e.latlng);
-        setPressing(false);
-      }, 700);
-      setPressing(true);
+    dblclick(e) {
+      onDoubleClick(e.latlng);
     },
-    mouseup() {
-      if (pressing) {
-        clearTimeout(timerRef.current);
-        setPressing(false);
+    touchend(e) {
+      const now = new Date().getTime();
+      const lastTouch = lastTouchRef.current;
+
+      if (lastTouch && now - lastTouch.time < 300 && e.latlng) {
+        onDoubleClick(e.latlng);
       }
+
+      lastTouchRef.current = { time: now };
     },
-    mousemove() {
-      if (pressing) {
-        clearTimeout(timerRef.current);
-        setPressing(false);
-      }
-    },
-    touchstart(e) {
-      setPressing(true);
-      timerRef.current = setTimeout(() => {
-        if (pressing && e.latlng) {
-          onLongPress(e.latlng);
-          setPressing(false);
-        }
-      }, 700);
-    },
-    touchend() {
-      if (pressing) {
-        clearTimeout(timerRef.current);
-        setPressing(false);
-      }
-    }
   });
 
   return null;
@@ -69,7 +58,7 @@ function LongPressPopup({ onLongPress }) {
 export default function Map({ routeType, userLocation }) {
   const [route, setRoute] = useState([]);
   const [isRouteVisible, setIsRouteVisible] = useState(false);
-  const [longPressPosition, setLongPressPosition] = useState(null);
+  const [doubleClickPosition, setDoubleClickPosition] = useState(null);
 
   const mapRef = useRef();
   const location = useLocation();
@@ -173,7 +162,7 @@ export default function Map({ routeType, userLocation }) {
           attribution='© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         />
         
-        <LongPressPopup onLongPress={(latlng) => setLongPressPosition([latlng.lat, latlng.lng])} />
+        <DoubleClickPopup onDoubleClick={(latlng) => setDoubleClickPosition([latlng.lat, latlng.lng])} />
 
         <Marker position={userLocation} icon={redIcon}>
           <Popup><h3 className="graffiti-title">Ваше местоположение</h3></Popup>
@@ -193,11 +182,11 @@ export default function Map({ routeType, userLocation }) {
           </Marker>
         ))}
 
-        {longPressPosition && (
-          <Marker position={longPressPosition}>
+        {doubleClickPosition && (
+          <Marker position={doubleClickPosition} icon={graffitiIcon}>
             <Popup
-              position={longPressPosition}
-              onClose={() => setLongPressPosition(null)}
+              position={doubleClickPosition}
+              onClose={() => setDoubleClickPosition(null)}
               autoClose={false}
               closeOnClick={false}
               closeButton={true}
@@ -208,10 +197,11 @@ export default function Map({ routeType, userLocation }) {
                 <div className='add-buttons'>
                   <button 
                     className="popup-button" 
-                    onClick={() => navigate(`/add-graffiti?coords=${longPressPosition[0]},${longPressPosition[1]}`)}>
+                    onClick={() => navigate(`/add-graffiti?coords=${doubleClickPosition[0]},${doubleClickPosition[1]}`)}
+                    >
                     Да, на этих координатах
                   </button>
-                  <button className="popup-button" onClick={() => setLongPressPosition(null)}>
+                  <button className="popup-button" onClick={() => setDoubleClickPosition(null)}>
                     Нет
                   </button>
                 </div>
