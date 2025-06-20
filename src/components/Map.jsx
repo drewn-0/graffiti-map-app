@@ -46,17 +46,17 @@ function DoubleClickPopup({ onDoubleClick }) {
 }
 
 export default function Map({ routeType, userLocation }) {
-  const [route, setRoute] = useState([]);
   const [isRouteVisible, setIsRouteVisible] = useState(false);
   const [doubleClickPosition, setDoubleClickPosition] = useState(null);
+  const [waypoints, setWaypoints] = useState([]);
+  const [tempRouteTypes, setTempRouteTypes] = useState({});
+  const [segments, setSegments] = useState([]);
 
   const mapRef = useRef();
   const location = useLocation();
   const navigate = useNavigate();
 
   const params = new URLSearchParams(location.search);
-  const rawType = new URLSearchParams(location.search).get('routeType') || routeType;
-  const currentRouteType = rawType === 'driving' || rawType === 'driving-car' ? 'driving' : 'walking';
   const highlightId = params.get('highlightId');
   const latParam = parseFloat(params.get('lat'));
   const lngParam = parseFloat(params.get('lng'));
@@ -79,7 +79,7 @@ export default function Map({ routeType, userLocation }) {
 
     if (graffitiId && userLocation) {
       const g = graffitiData.find((g) => String(g.id) === graffitiId);
-      if (g) buildRoute(g, type);
+      if (g) setWaypoints([{ ...g, routeType: type }]);
     }
   }, [userLocation, location.search, routeType]);
 
@@ -92,39 +92,71 @@ export default function Map({ routeType, userLocation }) {
     }
   }, [highlightId]);
 
-  const buildRoute = async (graffiti, type) => {
-    if (!userLocation) return;
+  useEffect(() => {
+    if (!userLocation || waypoints.length === 0) return;
 
-    const profile = type === 'driving' ? 'driving-car' : 'foot-walking';
+    const buildSegment = async (from, to, routeType) => {
+      const profile = routeType === 'driving' ? 'driving-car' : 'foot-walking';
+      const url = `https://api.openrouteservice.org/v2/directions/${profile}/geojson`;
 
-    const url = `https://api.openrouteservice.org/v2/directions/${profile}/geojson`;
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: { 
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer 5b3ce3597851110001cf624805088c2907db46d6a21787d3ef381872',},
-      body: JSON.stringify({
-        coordinates: [[userLocation[1], userLocation[0]], [graffiti.coordinates[1], graffiti.coordinates[0]]],
-      }),
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer 5b3ce3597851110001cf624805088c2907db46d6a21787d3ef381872',
+        },
+        body: JSON.stringify({
+          coordinates: [[from[1], from[0]], [to.coordinates[1], to.coordinates[0]]],
+        }),
+      });
+
+      if (!response.ok) return;
+
+      const data = await response.json();
+      const coords = data.features[0].geometry.coordinates.map(([lng, lat]) => [lat, lng]);
+      return {
+        points: coords,
+        color: routeType === 'driving' ? 'red' : 'blue',
+      };
+    };
+
+    const buildAllSegments = async () => {
+      const allSegments = [];
+      let from = { coordinates: userLocation };
+
+      for (const point of waypoints) {
+        const segment = await buildSegment(from.coordinates, point, point.routeType);
+        if (segment) allSegments.push(segment);
+        from = point;
+      }
+
+      setSegments(allSegments);
+      setIsRouteVisible(true);
+
+      const allPoints = allSegments.flatMap(seg => seg.points);
+      if (mapRef.current && allPoints.length > 0) {
+        const bounds = L.latLngBounds(allPoints);
+        mapRef.current.fitBounds(bounds);
+      }
+    };
+
+    buildAllSegments();
+  }, [waypoints, userLocation]);
+
+  const handleAddToRoute = (graffiti) => {
+    const selectedType = tempRouteTypes[graffiti.id] || 'walking';
+    setWaypoints(prev => {
+      const alreadyIn = prev.some(g => g.id === graffiti.id);
+      if (!alreadyIn) {
+        return [...prev, { ...graffiti, routeType: selectedType }];
+      }
+      return prev;
     });
-
-    if (!response.ok) {
-      throw new Error(`Ошибка ORS: ${response.statusText}`);
-    }
-
-    const data = await response.json();
-    const coordinates = data.features[0].geometry.coordinates.map(([lng, lat]) => [lat, lng]);
-    setRoute(coordinates);
-    setIsRouteVisible(true);
-
-    if (mapRef.current) {
-      const bounds = L.latLngBounds(coordinates);
-      mapRef.current.fitBounds(bounds);
-    }
   };
 
   const hideRoute = () => {
-    setRoute([]);
+    setWaypoints([]);
+    setSegments([]);
     setIsRouteVisible(false);
     params.delete('graffitiId');
     params.delete('routeType');
@@ -164,9 +196,39 @@ export default function Map({ routeType, userLocation }) {
               <div>
                 <h3 className="graffiti-title">{graffiti.name}</h3>
                 <p className="graffiti-description">{graffiti.description}</p>
-                <Link to={`/graffiti/${graffiti.id}`} className="popup-button">
+                <Link 
+                  style={{ marginRight:10, marginBottom: 10 }}
+                  to={`/graffiti/${graffiti.id}`} 
+                  className="popup-button">
                   Подробнее
                 </Link>
+                <button 
+                  className="popup-button" 
+                  onClick={() => handleAddToRoute(graffiti)}>
+                  Добавить в маршрут
+                </button>
+                <div className="route-type-selector fancy-radio-group" style={{ marginTop: '12px' }}>
+                  <label className="fancy-radio">
+                    <input
+                      type="radio"
+                      name={`routeType-${graffiti.id}`}
+                      value="walking"
+                      checked={tempRouteTypes[graffiti.id] === 'walking'}
+                      onChange={() => setTempRouteTypes(prev => ({ ...prev, [graffiti.id]: 'walking' }))}
+                    />
+                    <span className="fancy-radio-span">Пешком</span>
+                  </label>
+                  <label className="fancy-radio">
+                    <input
+                      type="radio"
+                      name={`routeType-${graffiti.id}`}
+                      value="driving"
+                      checked={tempRouteTypes[graffiti.id] === 'driving'}
+                      onChange={() => setTempRouteTypes(prev => ({ ...prev, [graffiti.id]: 'driving' }))}
+                    />
+                    <span className="fancy-radio-span">На машине</span>
+                  </label>
+                </div>
               </div>
             </Popup>
           </Marker>
@@ -200,12 +262,9 @@ export default function Map({ routeType, userLocation }) {
           </Marker>
         )}
 
-        {route.length > 0 && (
-          <Polyline 
-            positions={route} 
-            color={currentRouteType === 'driving' ? 'red' : 'blue'}
-          />
-        )}
+        {segments.length > 0 && segments.map((segment, index) => (
+          <Polyline key={index} positions={segment.points} color={segment.color} />
+        ))}
 
       </MapContainer>
 
