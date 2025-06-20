@@ -60,6 +60,8 @@ export default function Map({ routeType, userLocation }) {
   const highlightId = params.get('highlightId');
   const latParam = parseFloat(params.get('lat'));
   const lngParam = parseFloat(params.get('lng'));
+  const idsParam = params.get('ids');
+  const typeParam = params.get('routeType') || routeType;
 
   const highlightGraffiti = highlightId
     ? graffitiData.find(g => String(g.id) === highlightId)
@@ -76,10 +78,19 @@ export default function Map({ routeType, userLocation }) {
   useEffect(() => {
     const graffitiId = params.get('graffitiId');
     const type = params.get('routeType') || routeType;
+    if (userLocation) {
+      if (idsParam) {
+        const ids = idsParam.split(',').map(n => Number(n)).filter(n => !isNaN(n));
+        const pts = ids
+          .map(id => graffitiData.find(g => g.id === id))
+          .filter(Boolean)
+          .map(g => ({ ...g, routeType: typeParam }));
+        setWaypoints(pts);}
 
-    if (graffitiId && userLocation) {
-      const g = graffitiData.find((g) => String(g.id) === graffitiId);
-      if (g) setWaypoints([{ ...g, routeType: type }]);
+      else if (graffitiId) {
+        const g = graffitiData.find((g) => String(g.id) === graffitiId);
+        if (g) setWaypoints([{ ...g, routeType: type }]);
+      }
     }
   }, [userLocation, location.search, routeType]);
 
@@ -161,6 +172,18 @@ export default function Map({ routeType, userLocation }) {
     params.delete('graffitiId');
     params.delete('routeType');
     navigate(`${location.pathname}?${params.toString()}`);
+  };
+
+  const handleSaveRoute = () => {
+    if (!waypoints.length) return alert('Нет маршрута');
+    const saved = JSON.parse(localStorage.getItem('savedRoutes') || '[]');
+    saved.push({
+      id: Date.now(),
+      createdAt: new Date().toISOString(),
+      points: waypoints.map(w => ({ id: w.id, routeType: w.routeType })),
+    });
+    localStorage.setItem('savedRoutes', JSON.stringify(saved));
+    alert('Сохранён');
   };
 
   if (!userLocation) {
@@ -269,20 +292,36 @@ export default function Map({ routeType, userLocation }) {
       </MapContainer>
 
       {isRouteVisible && (
-        <button
-          className="popup-button"
-          onClick={hideRoute}
-          style={{
-            position: 'absolute',
-            border:'1px solid black',
-            top: '10px',
-            left: '50%',
-            transform: 'translateX(-50%)',
-            zIndex: 1000,
-          }}
-        >
-          Скрыть маршрут
-        </button>
+        <>
+          <button
+            className="popup-button"
+            onClick={hideRoute}
+            style={{
+              position: 'absolute',
+              border:'1px solid black',
+              top: '10px',
+              left: '50%',
+              transform: 'translateX(-50%)',
+              zIndex: 1000,
+            }}
+          >
+            Скрыть маршрут
+          </button>
+          <button
+            className="popup-button"
+            onClick={handleSaveRoute}
+            style={{
+              position: 'absolute',
+              border:'1px solid black',
+              top:  '60px',
+              left: '50%',
+              transform: 'translateX(-50%)',
+              zIndex: 1000,
+            }}
+          >
+            Сохранить маршрут
+          </button>
+        </>
       )}
     </div>
   );
