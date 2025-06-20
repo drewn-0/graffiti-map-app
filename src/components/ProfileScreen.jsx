@@ -1,184 +1,97 @@
-import { useState } from 'react';
-import { useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import graffitiData from '../data/graffitiData';
 
-const AddGraffitiScreen = () => {
-  const [formData, setFormData] = useState({
-    name: '',
-    coordinatesInput: '',
-    coordinates: ['',''],
-    description: '',
-    author: ''
-  });
-
-  const [coordError, setCoordError] = useState('');
-  const [photoFile, setPhotoFile] = useState(null);
-
-  const handleCoordinatesChange = (e) => {
-    const input = e.target.value;
-    const parts = input.split(',').map((part) => part.trim());
-
-    if (
-      parts.length === 2 &&
-      !isNaN(parseFloat(parts[0])) &&
-      !isNaN(parseFloat(parts[1]))
-    ) {
-      setFormData((prev) => ({
-        ...prev,
-        coordinatesInput: input,
-        coordinates: [parseFloat(parts[0]), parseFloat(parts[1])],
-      }));
-      setCoordError('');
-    } else {
-      setFormData((prev) => ({
-        ...prev,
-        coordinatesInput: input,
-        coordinates: ['', ''],
-      }));
-      setCoordError('Введите координаты в формате "12.3456, 12.3456"');
-    }
-  };
-
-  const handleUseMyLocation = () => {
-    if (!navigator.geolocation) {
-      alert('Геолокация не поддерживается вашим браузером');
-      return;
-    }
-
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const lat = position.coords.latitude.toFixed(6);
-        const lng = position.coords.longitude.toFixed(6);
-        const coordString = `${lat}, ${lng}`;
-
-        setFormData((prev) => ({
-          ...prev,
-          coordinatesInput: coordString,
-          coordinates: [parseFloat(lat), parseFloat(lng)],
-        }));
-        setCoordError('');
-      },
-      (error) => {
-        alert('Не удалось получить ваше местоположение');
-        console.error(error);
-      }
-    );
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-
-    if (coordError || formData.coordinates.includes('')) {
-      alert('Пожалуйста, введите корректные координаты.');
-      return;
-    }
-
-    setFormData({
-      name: '',
-      coordinatesInput: '',
-      coordinates: ['', ''],
-      description: '',
-      author: ''
-    });
-    setCoordError('');
-    alert('Обращение отправлено!');
-  };
-
-  const location = useLocation();
+const ProfileScreen = () => {
+  const [savedRoutes, setSavedRoutes] = useState([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    const params = new URLSearchParams(location.search);
-    const coords = params.get('coords');
-    if (coords) {
-      const [lat, lng] = coords.split(',').map(parseFloat);
-      if (!isNaN(lat) && !isNaN(lng)) {
-        const coordString = `${lat}, ${lng}`;
-        setFormData((prev) => ({
-          ...prev,
-          coordinatesInput: coordString,
-          coordinates: [lat, lng],
-        }));
-      }
-    }
-  }, [location.search]);
+    const saved = JSON.parse(localStorage.getItem('savedRoutes') || '[]');
+    setSavedRoutes(saved);
+  }, []);
+
+  const handleOpenRoute = (route) => {
+    const ids = route.points.map(p => p.id).join(',');
+    const type = route.points[0]?.routeType || 'walking';
+    navigate(`/?graffitiId=${ids}&routeType=${type}`);
+  };
+
+  const handleDelete = id => {
+    const filtered = savedRoutes.filter(r => r.id !== id);
+    setSavedRoutes(filtered);
+    localStorage.setItem('savedRoutes', JSON.stringify(filtered));
+  };
 
   return (
     <div className="app-screen">
-      <h2 className="screen-title">Добавить граффити</h2>
-      <form onSubmit={handleSubmit} className="add-form">
-        <label className="form-label">
-          <div className="form-title">Название</div>
-          <input
-            type="text"
-            value={formData.name}
-            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-            placeholder="Название граффити"
-            className="form-input"
-          />
-        </label>
+      <h2 className="screen-title">Профиль пользователя</h2>
+      <div className="convenience">
+        <img
+          src='/pictures/default_avatar.png'
+          alt="Profile"
+          style={{
+            width: 100,
+            height: 100,
+            borderRadius: '50%',
+            border: '3px solid #444',
+            objectFit: 'cover'
+          }}
+        />
+        <h3 className="screen-title">default_profile</h3>
+        
+        <div className="saved-routes">
+          <h3>Сохранённые маршруты</h3>
+          {savedRoutes.length === 0 ? (
+            <p>Нет сохранённых маршрутов</p>
+          ) : (
+            <ul style={{ listStyle: 'none', padding: 0 }}>
+              {savedRoutes.map(route => (
+                <li key={route.id} 
+                  className="engagement" style={{marginBottom: 12}}>
+                  <h4 className="graffiti-title" style={{ marginTop:0, marginBottom: 4}}>
+                    Маршрут от {new Date(route.createdAt).toLocaleString()}
+                  </h4>
+                  <div style={{ fontSize: 14 }}>
+                    {route.points.map(p => {
+                      const g = graffitiData.find(g => g.id === p.id);
+                      return <span className="graffiti-description" key={p.id}>{g ? g.name : p.id}</span>;
+                    }).reduce((prev, curr) => [prev, ' → ', curr])}
+                  </div>
+                  <button
+                    className="popup-button"
+                    style={{ marginTop: 8, marginRight: 8}}
+                    onClick={() => handleOpenRoute(route)}
+                  >
+                    Открыть маршрут
+                  </button>
+                  <button className="popup-button"
+                    style={{ marginTop: 8 }}
+                    onClick={() => handleDelete(route.id)}>
+                    Удалить</button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
 
-        <label className="form-label">
-          <div className="form-title">Координаты</div>
-          <div 
-            className="form-title"
-            style={{ fontWeight:300, marginBottom: '8px' }}
-            >На карте можно выбрать точку двойным нажатием</div>
-          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-            <input
-              type="text"
-              value={formData.coordinatesInput}
-              onChange={handleCoordinatesChange}
-              placeholder='Введите координаты'
-              className="form-input"
-              style={{ flex: 1 }}
-            />
-            <button
-              type="button"
-              onClick={handleUseMyLocation}
-              className="geo-button"
-            >
-              Моя геолокация
-            </button>
-          </div>
-          {coordError && <div style={{ color: 'red', fontSize: '20px' }}>{coordError}</div>}
-        </label>
+        <div className="engagement" >
+          <h4>Уровень: Новичок</h4>
+          <p>Посещено мест: 3</p>
+        </div>
 
-        <label className="form-label">
-          <div className="form-title">Описание</div>
-          <input
-            value={formData.description}
-            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-            placeholder="Описание граффити и места"
-            className="form-input"
-          />
-        </label>
-
-        <label className="form-label">
-          <div className="form-title">Автор граффити</div>
-          <input
-            value={formData.author}
-            onChange={(e) => setFormData({ ...formData, author: e.target.value })}
-            placeholder="Введите псевдоним или соц сети автора"
-            className="form-input"
-          />
-        </label>
-
-        <label className="form-label">
-          <div className="form-title">Фото граффити</div>
-          <input
-            type="file"
-            accept="image/*"
-            onChange={e => setPhotoFile(e.target.files?.[0])}
-            className="form-input"
-          />
-        </label>
-
-        <button type="submit" className="submit-button">
-          Добавить граффити
-        </button>
-      </form>
+        <div className="engagement">
+          <h4>🏆 Достижения</h4>
+          <ul style={{ listStyle: 'none', padding: 0, fontSize: 18 }}>
+            <li>• Добавил 5 граффити</li>
+            <li>• Первый маршрут построен</li>
+            <li>• Посещено первое место</li>
+          </ul>
+          <button className="submit-button">Открыть все достижения</button>
+        </div>
+      </div>
     </div>
   );
 };
 
-export default AddGraffitiScreen;
+export default ProfileScreen;
