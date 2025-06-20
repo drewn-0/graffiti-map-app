@@ -39,6 +39,32 @@ const AddGraffitiScreen = () => {
     }
   };
 
+  const handleUseMyLocation = () => {
+    if (!navigator.geolocation) {
+      alert('Геолокация не поддерживается вашим браузером');
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const lat = position.coords.latitude.toFixed(6);
+        const lng = position.coords.longitude.toFixed(6);
+        const coordString = `${lat}, ${lng}`;
+
+        setFormData((prev) => ({
+          ...prev,
+          coordinatesInput: coordString,
+          coordinates: [parseFloat(lat), parseFloat(lng)],
+        }));
+        setCoordError('');
+      },
+      (error) => {
+        alert('Не удалось получить ваше местоположение');
+        console.error(error);
+      }
+    );
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
 
@@ -92,16 +118,27 @@ const AddGraffitiScreen = () => {
         </label>
 
         <label className="form-label">
-          <div className="form-title">Введите координаты места</div>
+          <div className="form-title">Координаты</div>
+          <div 
+            className="form-title"
+            style={{ fontWeight:300, marginBottom: '8px' }}
+            >На карте можно выбрать точку двойным нажатием</div>
           <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
             <input
               type="text"
               value={formData.coordinatesInput}
               onChange={handleCoordinatesChange}
-              placeholder='На карте можно выбрать место двойным нажатием'
+              placeholder='Введите координаты'
               className="form-input"
               style={{ flex: 1 }}
             />
+            <button
+              type="button"
+              onClick={handleUseMyLocation}
+              className="geo-button"
+            >
+              Моя геолокация
+            </button>
           </div>
           {coordError && <div style={{ color: 'red', fontSize: '20px' }}>{coordError}</div>}
         </label>
