@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import graffitiData from '../data/graffitiData';
 import { Link, useNavigate } from 'react-router-dom';
+import FitPhoto from '/src/components/FitPhoto';
 
 
 const normalizeText = (text) => {
@@ -59,6 +60,7 @@ const InfoPanel = () => {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
+          
           {searchQuery.trim() !== '' ? (
             searchResults.length > 0 ? (
               <div className="search-results">
@@ -69,8 +71,22 @@ const InfoPanel = () => {
                       className="card-link" 
                       style={{ textDecoration: 'none', color: 'inherit' }}
                     >
-                      <h3 className="graffiti-title">{g.name}</h3>
-                      <p className="graffiti-description">{g.description}</p>
+                      <div className="photo-container in-list">
+                        {g.photos && g.photos.length > 0 ? (
+                          <FitPhoto
+                            src={g.photos[0]}
+                            alt={g.name}
+                            containerWidth={100}
+                            containerHeight={100}
+                          />
+                        ) : (
+                          <p className="graffiti-title">Нет фото</p>
+                        )}
+                      </div>
+                      <div className="graffiti-info">
+                        <h3 className="graffiti-title">{g.name}</h3>
+                        <p className="graffiti-description">{g.description}</p>
+                      </div>
                     </Link>
                     <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
                       <button className="popup-button" onClick={() => handleBuildRoute(g)}>
