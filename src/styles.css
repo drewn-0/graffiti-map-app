@@ -189,7 +189,7 @@ body {
   color: inherit;
 }
 
-.with-photo {
+.with-photo, .card-link {
   display:flex;
   align-items: center;
   justify-content: flex-start;
@@ -440,6 +440,14 @@ body {
   padding:20px;
 }
 
+.engagement h4 {
+  text-align: center;
+}
+
+.saved-routes ul li {
+  text-align: center;
+}
+
 .achievements .ul .li {
   margin-top:10px;
 }
@@ -496,6 +504,16 @@ body.dark-theme .search-result {
   border-color: #666666;
 }
 
+.geo-button {
+  background-color: rgba(44, 44, 44);
+  color: #ffffff;
+  padding: 10px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 20px;
+}
+
 @media (max-width: 640px) {
   .header-title {
     font-size: 20px;
@@ -505,7 +523,7 @@ body.dark-theme .search-result {
     font-size: 14px;
   }
 
-  .popup-button, .report-button, .submit-button {
+  .popup-button, .report-button, .submit-button, .geo-button {
     font-size: 14px;
   }
 
@@ -525,5 +543,9 @@ body.dark-theme .search-result {
 
   .comments-title {
     font-size: 14px;
+  }
+
+  .fancy-radio-span {
+    padding:6px;
   }
 }
